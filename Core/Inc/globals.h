@@ -22,7 +22,8 @@ extern "C" {
 #define LED_2 GPIOB, GPIO_PIN_10
 #define LED_3 GPIOB, GPIO_PIN_1
 
-#define BTN_SPINDLE GPIOC, GPIO_PIN_15
+#define BTN_SPINDLE GPIOC, GPIO_PIN_14
+#define BTN_BONUS GPIOC, GPIO_PIN_15
 
 #define BTN_V_0 GPIOB, GPIO_PIN_4
 #define BTN_V_1 GPIOB, GPIO_PIN_5
@@ -31,7 +32,6 @@ extern "C" {
 #define BTN_V_4 GPIOB, GPIO_PIN_8
 #define BTN_V_5 GPIOB, GPIO_PIN_9
 #define BTN_V_6 GPIOC, GPIO_PIN_13
-#define BTN_V_7 GPIOC, GPIO_PIN_14
 
 #define BTN_H_0 GPIOB, GPIO_PIN_3
 #define BTN_H_1 GPIOA, GPIO_PIN_15

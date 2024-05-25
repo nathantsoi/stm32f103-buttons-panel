@@ -25,6 +25,7 @@
 #include "usbd_cdc_if.h"
 #include "globals.h"
 #include "lowpassfilter.h"
+#include "debounce.h"
 #include <math.h>
 /* USER CODE END Includes */
 
@@ -48,7 +49,6 @@ DMA_HandleTypeDef hdma_adc1;
 
 /* USER CODE BEGIN PV */
 uint8_t buttons[NUM_BUTTONS];
-uint8_t buttons_last[NUM_BUTTONS];
 lp_t dial_filters[NUM_DIALS];
 uint32_t dials[NUM_DIALS];
 uint32_t dials_last[NUM_DIALS];
@@ -67,12 +67,9 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void check_last_button_and_send(uint8_t idx) {
-  if (buttons[idx] != buttons_last[idx]) {
-    sprintf(button_string, "B:%02d:%1d\r\n", idx, buttons[idx]?1:0);
-    CDC_Transmit_FS((uint8_t*)button_string, strlen(button_string));
-    buttons_last[idx] = buttons[idx];
-  }
+void send_button(uint8_t idx) {
+  sprintf(button_string, "B:%02d:%1d\r\n", idx, buttons[idx]?1:0);
+  CDC_Transmit_FS((uint8_t*)button_string, strlen(button_string));
 }
 
 void check_last_dials() {
@@ -102,6 +99,10 @@ void send_dials() {
     dials_last[3] = rounded[3];
   }
 }
+
+
+ButtonDebounce_Config db[NUM_BUTTONS];
+static ButtonDebounce_State dbs[NUM_BUTTONS];
 
 /* USER CODE END 0 */
 
@@ -139,7 +140,12 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   for(uint8_t i = 0; i < NUM_DIALS; i++) {
-    dial_filters[i].beta = .0025f;
+    dial_filters[i].beta = .0015f;
+  }
+  for(uint8_t i = 0; i < NUM_BUTTONS; i++) {
+    db[i].rose = &send_button;
+    db[i].idx = i;
+    button_debounce__init(&dbs[i]);
   }
 
 
@@ -158,8 +164,8 @@ int main(void)
       buttons[4] = HAL_GPIO_ReadPin(BTN_V_4);
       buttons[5] = HAL_GPIO_ReadPin(BTN_V_5);
       buttons[6] = HAL_GPIO_ReadPin(BTN_V_6);
-      buttons[7] = HAL_GPIO_ReadPin(BTN_V_7);
 
+      buttons[7] = HAL_GPIO_ReadPin(BTN_H_9);
       buttons[8] = HAL_GPIO_ReadPin(BTN_H_0);
       buttons[9] = HAL_GPIO_ReadPin(BTN_H_1);
       buttons[10] = HAL_GPIO_ReadPin(BTN_H_2);
@@ -169,12 +175,12 @@ int main(void)
       buttons[14] = HAL_GPIO_ReadPin(BTN_H_6);
       buttons[15] = HAL_GPIO_ReadPin(BTN_H_7);
       buttons[16] = HAL_GPIO_ReadPin(BTN_H_8);
-      buttons[17] = HAL_GPIO_ReadPin(BTN_H_9);
+      buttons[17] = HAL_GPIO_ReadPin(BTN_SPINDLE);
+      buttons[18] = HAL_GPIO_ReadPin(BTN_BONUS);
 
-      buttons[18] = HAL_GPIO_ReadPin(BTN_SPINDLE);
 
-      for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
-        check_last_button_and_send(i);
+      for(uint8_t i = 0; i < NUM_BUTTONS; i++) {
+        button_debounce__sample(&db[i], &dbs[i], buttons[i]);
       }
     }
 

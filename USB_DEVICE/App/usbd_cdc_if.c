@@ -263,37 +263,38 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
-  // reset leds
-  HAL_GPIO_WritePin(LED_X, 0);
-  HAL_GPIO_WritePin(LED_Y, 0);
-  HAL_GPIO_WritePin(LED_Z, 0);
-  HAL_GPIO_WritePin(LED_1, 0);
-  HAL_GPIO_WritePin(LED_2, 0);
-  HAL_GPIO_WritePin(LED_3, 0);
-
-
   switch ((char)Buf[0]) {
   case 'X':
     HAL_GPIO_WritePin(LED_X, 1);
+    HAL_GPIO_WritePin(LED_Y, 0);
+    HAL_GPIO_WritePin(LED_Z, 0);
     break;
   case 'Y':
+    HAL_GPIO_WritePin(LED_X, 0);
     HAL_GPIO_WritePin(LED_Y, 1);
+    HAL_GPIO_WritePin(LED_Z, 0);
     break;
   case 'Z':
+    HAL_GPIO_WritePin(LED_X, 0);
+    HAL_GPIO_WritePin(LED_Y, 0);
     HAL_GPIO_WritePin(LED_Z, 1);
     break;
   case '1':
     HAL_GPIO_WritePin(LED_1, 1);
+    HAL_GPIO_WritePin(LED_2, 0);
+    HAL_GPIO_WritePin(LED_3, 0);
     break;
   case '2':
+    HAL_GPIO_WritePin(LED_1, 0);
     HAL_GPIO_WritePin(LED_2, 1);
+    HAL_GPIO_WritePin(LED_3, 0);
     break;
   case '3':
+    HAL_GPIO_WritePin(LED_1, 0);
+    HAL_GPIO_WritePin(LED_2, 0);
     HAL_GPIO_WritePin(LED_3, 1);
     break;
   default:
-    break;
-
     break;
   }
   return (USBD_OK);
