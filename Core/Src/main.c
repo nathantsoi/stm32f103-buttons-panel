@@ -68,7 +68,7 @@ static void MX_ADC1_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void send_button(uint8_t idx) {
-  sprintf(button_string, "B:%02d:%1d\r\n", idx, buttons[idx]?1:0);
+  sprintf(button_string, "B:%02d:%1d\r\n", idx, buttons[idx]?0:1);
   CDC_Transmit_FS((uint8_t*)button_string, strlen(button_string));
 }
 
@@ -144,6 +144,7 @@ int main(void)
   }
   for(uint8_t i = 0; i < NUM_BUTTONS; i++) {
     db[i].rose = &send_button;
+    db[i].fell = &send_button;
     db[i].idx = i;
     button_debounce__init(&dbs[i]);
   }
